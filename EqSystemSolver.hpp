@@ -10,9 +10,7 @@
 class EqSystemSolver
 {
 private:
-    int size;
-    int nCols;
-    int nRows;
+    int size; // size représente la taille de la matrice et le nombre d'inconnue. Un système à n inconnue génère une matrice nxn
     std::vector<std::vector<double>> A;
     std::vector<double> b;
 
@@ -22,7 +20,7 @@ public:
     friend double getCofactor(int size, std::vector<std::vector<double>> A);
     double Determinant() const;
     std::vector<std::vector<double>> GetA() const;
-    std::vector<std::vector<double>> GetB() const;
+    std::vector<double> GetB() const;
     friend std::vector<std::vector<double>> getSubMatrix(std::vector<std::vector<double>> A, int i, int j);
     void SetA(std::vector<std::vector<double>> newA);
     void SetB(std::vector<double> newB);
@@ -33,6 +31,10 @@ public:
     std::vector<std::vector<double>> Inverse();
     std::vector<double> SolverGauss();
     std::vector<double> SolverInverseMatrix();
+    friend std::ostream& operator<<(std::ostream& output,
+    const std::vector<double>& b);
+    friend std::ostream& operator<<(std::ostream& output,
+    const std::vector<std::vector<double>>& A);
 };
 
 #endif

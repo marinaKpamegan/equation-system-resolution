@@ -1,17 +1,13 @@
 //#include "functions.cpp"
 #include "EqSystemSolver.hpp"
 #include <iostream>
-#include <cmath>
+#include <cassert>
 using namespace std;
 
 int main (){
-    vector<vector<double>> A = { {  1, 1, 1 },
-                                {  1, 2, 3 },
-                                {  -2, 3, -1 }};
-    vector<double> b = {3, 6, 0} ;
-    vector<double> x;
     double det;
     int n;
+    int choix = 1;
     
     // det = e.Determinant();
     std::cout<<"Nombres d'inconnues "<<std::endl;
@@ -19,6 +15,11 @@ int main (){
     // det = e.Determinant();
     // std::cout<<det;
     // std::cout<<calculateDeterminant(2, A);
+    assert(n>0);
+
+    std::vector<std::vector<double>> A(n, std::vector<double>(n));
+    std::vector<double> b(n);
+    vector<double> x;
     std::cout<<"Entrez les valeurs de la matrice A de l'équation:"<<std::endl;
     for(int i=0; i<n; i++){
         for(int j=0; j<n; j++){
@@ -32,8 +33,34 @@ int main (){
         std::cout<<"b["<<i<<"]=";
         std::cin>> b[i];
     }
+
     EqSystemSolver e(n, A, b);
-    x = e.SolverGauss();
-    std::cout<<x[0]<<" "<<x[1]<<" "<<x[2];
+
+    std::cout<<"Choisir la méthode de résolution."<<std::endl;
+    std::cout<<"1. Pivot de Gauss"<<std::endl;
+    std::cout<<"2. Matrice inverse"<<std::endl;
+    std::cin>> choix;
+
+    if(choix == 1){
+        x = e.SolverGauss();
+        for (int i = 0; i < n; i++)
+        {
+            std::cout << x[i] << " ";
+        }
+        std::cout << "\n";
+    }else if(choix== 2){
+        x = e.SolverInverseMatrix();
+        for (int i = 0; i < n; i++)
+        {
+            std::cout << x[i] << " ";
+        }
+        std::cout << "\n";
+    }else{
+        std::cout<<"Mauvais choix. Réessayez"<<std::endl;
+        std::cin>> choix;
+    }
+   
+    
+    
 }
 

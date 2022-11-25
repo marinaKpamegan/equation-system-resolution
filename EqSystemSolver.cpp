@@ -5,16 +5,13 @@
 #include <cassert>
 #include <vector>
 
-EqSystemSolver::EqSystemSolver(int taille, std::vector<std::vector<double>> matrix, std::vector<double> B)
+EqSystemSolver::EqSystemSolver(int n, std::vector<std::vector<double>> matrix, std::vector<double> B)
 {
     A = matrix;
     b = B;
-    size = taille;
+    size = n;
 }
 
-/*vector<vector<double>> EqSystemSolver::Concatenate(){
-
-}*/
 double calculateDeterminant(int size, std::vector<std::vector<double>> A)
 {
     double det = 0.0;
@@ -63,11 +60,12 @@ double calculateDeterminant(int size, std::vector<std::vector<double>> A)
 
 std::vector<double> mult(int size, std::vector<std::vector<double>> A, std::vector<double> b)
 {
+    // multiplication entre une matrice et un vecteur
     std::vector<double> Ab(size);
 
     for (int i = 0; i < size; i++)
     {
-        int sum = 0;
+        double sum = 0;
         for (int j = 0; j < size; j++)
         {
             sum += A[i][j] * b[j];
@@ -78,25 +76,9 @@ std::vector<double> mult(int size, std::vector<std::vector<double>> A, std::vect
     return Ab;
 }
 
-std::vector<std::vector<double>> reverseMatrix(int size, std::vector<std::vector<double>> A)
-{
-    double det;
-    std::vector<std::vector<double>> matrixReverse(size, std::vector<double>(size));
-    det = calculateDeterminant(size, A);
-
-    for (int i = 0; i < size; i++)
-    {
-        for (int j = 0; j < size; j++)
-        {
-            matrixReverse[i][j] = 1 / det * A[i][j];
-        }
-    }
-    return matrixReverse; // A moins 1
-}
-
 std::vector<std::vector<double>> EqSystemSolver::Transpose() const
 {
-
+    // les lignes de la matrice A deviennent colonnes et les colonnes deviennent les lignes
     std::vector<std::vector<double>> matrixT(size, std::vector<double>(size));
     for (int i = 0; i < size; i++)
     {
@@ -114,7 +96,7 @@ std::vector<std::vector<double>> getSubMatrix(std::vector<std::vector<double>> A
     int subMatrix_i = 0, subMatrix_j = 0;
     std::vector<std::vector<double>> subMatrix(size - 1, std::vector<double>(size - 1));
 
-    // std::cout << "row= " << row << " j= " << col << "\n";
+    // on retourne les sous matrices de A selon la ligne et la colonne
     for (int i = 0; i < size; i++)
     {
         if (i != row)
@@ -125,7 +107,6 @@ std::vector<std::vector<double>> getSubMatrix(std::vector<std::vector<double>> A
                 if (j != col)
                 {
                     subMatrix[subMatrix_i][subMatrix_j] = A[i][j];
-                    // std::cout << "value at " << i << " " << j << " --> " << A[i][j] << "\n";
                     subMatrix_j++;
                 }
             }
@@ -133,33 +114,8 @@ std::vector<std::vector<double>> getSubMatrix(std::vector<std::vector<double>> A
         }
     }
 
-    // todo to remove
-    for (int i = 0; i < size - 1; i++)
-    {
-        for (int j = 0; j < size - 1; j++)
-        {
-            std::cout << subMatrix[i][j] << " ";
-        }
-        std::cout << "\n";
-    }
-    std::cout << "\n";
     return subMatrix;
 }
-
-/*std::vector<std::vector<double>> EqSystemSolver::Inverse(){
-    double det;
-    std::vector<std::vector<double>> matrixReverse(size, std::vector<double>(size));
-    det = calculateDeterminant(size, A);
-    assert(det !=0);
-
-    for (int i=0; i<size; i++){
-        for (int j=0; j<size; j++){
-            matrixReverse[i][j] = 1/det * A[i][j];
-        }
-    }
-    return matrixReverse;  // A moins 1
-
-}*/
 
 double EqSystemSolver::Determinant() const
 {
@@ -170,7 +126,7 @@ double EqSystemSolver::Determinant() const
 
     if (size == 2)
     {
-        return ((A[0][0] * A[1][1]) - (A[1][0] * A[0][1]));
+        return ((A[0][0] * A[1][1]) - (A[1][0] * A[0][1])); //
     }
     else
     {
@@ -208,15 +164,17 @@ std::vector<double> EqSystemSolver::SolverGauss()
     std::vector<double> x(size);
     std::vector<std::vector<double>> matrix(size, std::vector<double>(size + 1));
     double ratio;
-    matrix = AugmentedMatrix();
+    matrix = AugmentedMatrix(); // on détermine la matrix augmenté grace à une concaténation de A et b : on obtient une matrice nxm avec m=n+1
     for (int i = 0; i < size; i++)
     {
 
         if (matrix[i][i] == 0.0)
         {
-            std::cout << "Mathematical Error!";
+            std::cout << "Mathematical Error!"; // On s'assure qu'aucun pivot n'est nul
             exit(0);
         }
+
+        // triangularisation de la matrice par la méthode de pivot
         for (int j = i + 1; j < size; j++)
         {
             ratio = matrix[j][i] / matrix[i][i];
@@ -228,7 +186,8 @@ std::vector<double> EqSystemSolver::SolverGauss()
         }
     }
 
-    x[size - 1] = matrix[size - 1][size] / matrix[size - 1][size - 1];
+    // détermination des solutions par la méthode de substitution
+    x[size - 1] = matrix[size - 1][size] / matrix[size - 1][size - 1]; // on commence par la base du triangle et nous obtenons une valeur de la solution
     for (int i = size - 2; i >= 0; i--)
     {
         x[i] = matrix[i][size];
@@ -245,7 +204,7 @@ std::vector<double> EqSystemSolver::SolverGauss()
 std::vector<std::vector<double>> EqSystemSolver::AugmentedMatrix()
 {
     std::vector<std::vector<double>> matrix(size, std::vector<double>(size + 1));
-
+    // concatenation de la matrice A au vecteur b
     for (int i = 0; i < size; i++)
     {
         for (int j = 0; j < size + 1; j++)
@@ -257,14 +216,6 @@ std::vector<std::vector<double>> EqSystemSolver::AugmentedMatrix()
         }
     }
 
-    for (int i = 0; i < size; i++)
-    {
-        for (int j = 0; j < size + 1; j++)
-        {
-            std::cout << matrix[i][j] << " ";
-        }
-        std::cout << "\n";
-    }
     return matrix;
 }
 
@@ -274,29 +225,39 @@ std::vector<double> EqSystemSolver::SolverInverseMatrix()
     std::vector<std::vector<double>> matrixT(size, std::vector<double>(size));
     std::vector<double> x(size);
 
-    matrixT = Transpose();
-    int det = Determinant();
+    int det = Determinant(); // etape 1 calculer le déterminant
+    int sign = -1;
 
     if (det != 0)
     {
+        matrixT = Transpose(); // etape 2: transposer la matrice
+        // etape 3: déterminer la matrice adjointe en calculant les cofacteurs
         for (int i = 0; i < size; i++)
         {
             for (int j = 0; j < size; j++)
             {
-                invMatrix[i][j] = (pow(-1, i + j) * calculateDeterminant(size - 1, getSubMatrix(matrixT, i, j, size)))/det;
+                sign = pow(-1, i + j); // le signe du cofacteur
+                // std::cout<<"i= "<<i<<" j=" <<j << " sign"<<sign<<std::endl;
+                invMatrix[i][j] = (sign * calculateDeterminant(size - 1, getSubMatrix(matrixT, i, j, size))) / det; // les valeurs de la matrice inverse en multipliant les valeurs de la matrice adjointe par l'inverse du determinant;
             }
         }
 
-        x = mult(size, invMatrix, b);
-
-        for (int i = 0; i < size; i++)
-        {
-            for (int j = 0; j < size; j++)
-            {
-                std::cout << invMatrix[i][j] << " ";
-            }
-            std::cout << "\n";
-        }
+        x = mult(size, invMatrix, b); // la solution est la multiplication de la matrice inverse par b
+        return x;
     }
-    return x;
+    else
+    {
+        std::cout << "Calcul impossible\n";
+        exit(0);
+    }
+}
+
+std::vector<std::vector<double>> EqSystemSolver::GetA() const
+{
+    return A;
+}
+
+std::vector<double> EqSystemSolver::GetB() const
+{
+    return b;
 }
